@@ -6,12 +6,7 @@ const app = express();
 const server = http.createServer(app);
 const crypto = require("crypto");
 
-const io = require("socket.io")(server, {
-	cors: {
-	  origin: "http://localhost:3000",
-	  methods: ["GET", "POST"]
-	}
-})
+const io = require("socket.io")(server)
 
 app.use(express.static(path.join(__dirname, "build")));
 
