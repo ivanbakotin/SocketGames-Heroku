@@ -6,7 +6,7 @@ function getRandomNumber(max) {
   return Math.floor(Math.random() * max);
 }
 
-function getUsersRGB(io, id) {
+function updateUsersRGB(io, id) {
 
   const clients = io.sockets.adapter.rooms.get(id);
 
@@ -34,16 +34,13 @@ module.exports = function (socket, io) {
   let green;
   let blue;
 
+  socket.score = 0;
+
   socket.on("get-users-rgb", id => {
-    getUsersRGB(io, id)
+    updateUsersRGB(io, id)
   })
 
-  socket.on("join-game", id => {
-    socket.score = 0;
-    socket.join(id);
-  })
-
-  socket.on("leave-game", id => {
+  socket.on("leave-game-rgb", id => {
     socket.leave(id);
   })
 
@@ -68,11 +65,11 @@ module.exports = function (socket, io) {
     if (answer.red == red && answer.green == green && answer.blue == blue) {
       socket.score++;
       socket.emit("get-answer", true)
-      getUsersRGB(io, id)
+      updateUsersRGB(io, id)
     } else {
       socket.score--;
       socket.emit("get-answer", false)
-      getUsersRGB(io, id)
+      updateUsersRGB(io, id)
     }
   })
 }

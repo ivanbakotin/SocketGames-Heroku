@@ -18,8 +18,7 @@ io.on("connection", socket => {
   require('./socket/lobbyplayers.js')(socket, io);
   require('./socket/lobbychat.js')(socket, io);
   require('./socket/lobbywaiting.js')(socket, io);
-  require('./socket/games/gameDrawing.js')(socket, io);
-  require('./socket/games/gameTyping.js')(socket, io);
+  require('./socket/games/gameTicTacToe.js')(socket, io);
   require('./socket/games/gameRGB.js')(socket, io);
 })
 
