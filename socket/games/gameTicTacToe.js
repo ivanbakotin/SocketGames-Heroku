@@ -40,7 +40,7 @@ function checkDiagonal(board, socket) {
       return true;
     }
   }
-  
+
   win = 0;
   for (let i = 2; i < 7; i += 2) {
     if (socket.sign === board[i].sign) {
@@ -55,14 +55,15 @@ function checkDiagonal(board, socket) {
 }
 
 function checkGame(socket, io, id, board) {
-
-  if (checkRow(board, socket) || checkColumn(board, socket) || checkDiagonal(board, socket)) {
-
+  if (
+    checkRow(board, socket) ||
+    checkColumn(board, socket) ||
+    checkDiagonal(board, socket)
+  ) {
     socket.score++;
     io.sockets.in(id).emit("game-over-tic");
-    updatePlayers(io, id)
+    updatePlayers(io, id);
     return;
-
   } else {
     for (const tile of board) {
       if (!tile.sign) {
@@ -75,40 +76,44 @@ function checkGame(socket, io, id, board) {
 }
 
 function updatePlayers(io, id) {
-
   const clients = io.sockets.adapter.rooms.get(id);
 
-    if (clients) {
+  if (clients) {
+    const users = [];
 
-      const users =  [];
+    for (const clientId of clients) {
+      const clientSocket = io.sockets.sockets.get(clientId);
 
-      for (const clientId of clients) {
-        const clientSocket = io.sockets.sockets.get(clientId);
+      users.push({
+        nickname: clientSocket.nickname,
+        sign: clientSocket.sign,
+        move: clientSocket.move,
+        score: clientSocket.score,
+      });
+    }
 
-        users.push({
-          nickname: clientSocket.nickname,
-          sign: clientSocket.sign,
-          move: clientSocket.move,
-          score: clientSocket.score,
-        })
-      }
-
-      io.sockets.in(id).emit('get-players', users);
-    } 
+    io.sockets.in(id).emit("get-players", users);
+  }
 }
 
-module.exports = function (socket, io) { 
+module.exports = function (socket, io) {
+  let board = [
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+    { sign: "" },
+  ];
 
-  let board = [ {sign: "",}, {sign: "",}, {sign: "",},
-                {sign: "",}, {sign: "",}, {sign: "",},
-                {sign: "",}, {sign: "",}, {sign: "",} ];
-
-  socket.on("tic-tac-toe-setup", id => {
+  socket.on("tic-tac-toe-setup", (id) => {
     const clients = io.sockets.adapter.rooms.get(id);
 
     if (clients) {
-
-      const users =  [];
+      const users = [];
 
       let i = 0;
 
@@ -116,12 +121,12 @@ module.exports = function (socket, io) {
         const clientSocket = io.sockets.sockets.get(clientId);
 
         clientSocket.score = 0;
-        
+
         if (i) {
-          clientSocket.sign = "X"
+          clientSocket.sign = "X";
           clientSocket.move = true;
         } else {
-          clientSocket.sign = "O"
+          clientSocket.sign = "O";
           clientSocket.move = false;
         }
 
@@ -130,50 +135,52 @@ module.exports = function (socket, io) {
           sign: clientSocket.sign,
           move: clientSocket.move,
           score: clientSocket.score,
-        })
+        });
 
         i++;
       }
 
-      io.sockets.in(id).emit('get-players', users);
-      io.sockets.in(id).emit('move-made-tic', board);
-    } 
-  })
+      io.sockets.in(id).emit("get-players", users);
+      io.sockets.in(id).emit("move-made-tic", board);
+    }
+  });
 
   socket.on("make-move-tic", (index, id) => {
-
-    if (socket.move && !board[index].sign) {  
-
+    if (socket.move && !board[index].sign) {
       socket.move = false;
       board[index].sign = socket.sign;
-  
-      checkGame(socket, io, id, board)
+
+      checkGame(socket, io, id, board);
 
       socket.broadcast.to(id).emit("update-board", board);
       socket.broadcast.to(id).emit("send-move");
-      io.sockets.in(id).emit('move-made-tic', board); 
+      io.sockets.in(id).emit("move-made-tic", board);
     }
-  })
+  });
 
-  socket.on("set-move", id => {
+  socket.on("set-move", (id) => {
     socket.move = true;
-    updatePlayers(io, id)
-  })
+    updatePlayers(io, id);
+  });
 
-  socket.on("set-board", data => {
+  socket.on("set-board", (data) => {
     board = data;
-  })
+  });
 
-  socket.on("leave-game-tic", id => {
-    socket.leave(id);
-  })
-
-  socket.on("reset-game-tic", id => {
-    board = [ {sign: "",}, {sign: "",}, {sign: "",},
-              {sign: "",}, {sign: "",}, {sign: "",},
-              {sign: "",}, {sign: "",}, {sign: "",} ];
+  socket.on("reset-game-tic", (id) => {
+    board = [
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+      { sign: "" },
+    ];
 
     socket.broadcast.to(id).emit("update-board", board);
     io.sockets.in(id).emit("move-made-tic", board);
-  })
-}
+  });
+};

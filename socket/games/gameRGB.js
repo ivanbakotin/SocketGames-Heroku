@@ -7,42 +7,35 @@ function getRandomNumber(max) {
 }
 
 function updateUsersRGB(io, id) {
-
   const clients = io.sockets.adapter.rooms.get(id);
 
   if (clients) {
-    
     const users = [];
-  
-    for (const clientId of clients ) {
+
+    for (const clientId of clients) {
       const clientSocket = io.sockets.sockets.get(clientId);
 
-      users.push({ 
-        id: clientId, 
-        nickname: clientSocket.nickname, 
+      users.push({
+        id: clientId,
+        nickname: clientSocket.nickname,
         score: clientSocket.score,
       });
     }
 
-    io.sockets.in(id).emit('send-users-rgb', users);
-  } 
+    io.sockets.in(id).emit("send-users-rgb", users);
+  }
 }
 
-module.exports = function (socket, io) { 
-
+module.exports = function (socket, io) {
   let red;
   let green;
   let blue;
 
   socket.score = 0;
 
-  socket.on("get-users-rgb", id => {
-    updateUsersRGB(io, id)
-  })
-
-  socket.on("leave-game-rgb", id => {
-    socket.leave(id);
-  })
+  socket.on("get-users-rgb", (id) => {
+    updateUsersRGB(io, id);
+  });
 
   socket.on("get-rgb-colors", (difficulty = 6) => {
     red = getRGBValue();
@@ -52,7 +45,11 @@ module.exports = function (socket, io) {
     const colors = [];
 
     for (let i = 0; i < difficulty; i++) {
-      colors.push({ red: getRGBValue(), green: getRGBValue(), blue: getRGBValue()})
+      colors.push({
+        red: getRGBValue(),
+        green: getRGBValue(),
+        blue: getRGBValue(),
+      });
     }
 
     colors[getRandomNumber(difficulty)] = { red, green, blue };
@@ -64,12 +61,12 @@ module.exports = function (socket, io) {
   socket.on("send-answer", (answer, id) => {
     if (answer.red == red && answer.green == green && answer.blue == blue) {
       socket.score++;
-      socket.emit("get-answer", true)
-      updateUsersRGB(io, id)
+      socket.emit("get-answer", true);
+      updateUsersRGB(io, id);
     } else {
       socket.score--;
-      socket.emit("get-answer", false)
-      updateUsersRGB(io, id)
+      socket.emit("get-answer", false);
+      updateUsersRGB(io, id);
     }
-  })
-}
+  });
+};
