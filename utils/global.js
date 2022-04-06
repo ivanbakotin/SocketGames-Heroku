@@ -54,7 +54,7 @@ function checkIfHost(socket, id) {
 function checkMaxPlayers(game, io, id) {
   const clients = io.sockets.adapter.rooms.get(id);
   if (clients) {
-    return clients.size == game.maxplayers;
+    return game.maxplayers.includes(clients.size);
   }
   return false;
 }

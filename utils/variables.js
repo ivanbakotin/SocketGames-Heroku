@@ -1,6 +1,6 @@
 const gameList = {
   tictactoe: {
-    maxplayers: 2,
+    maxplayers: [2],
     display: "Tic Tac Toe",
     name: "tictactoe",
     description:
@@ -9,7 +9,7 @@ const gameList = {
       "R-Red, G-Green, B-Blue. Higher the number stronger the corresponding color.",
   },
   rgb: {
-    maxplayers: 4,
+    maxplayers: [1, 2, 3, 4],
     display: "RGB Game",
     name: "rgb",
     description:
